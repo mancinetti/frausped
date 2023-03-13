@@ -1,0 +1,7 @@
+{
+  "name": "frausped",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
