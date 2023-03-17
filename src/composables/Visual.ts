@@ -37,7 +37,7 @@ const storage = new Storage({
   name: "__mydb",
 });
 storage.create();
-
+ 
 export function Visual() {
   const sendAudio = (st: st) => {
     if (st.flag == true) {
@@ -49,8 +49,41 @@ export function Visual() {
     }
     return st.class;
   };
-  const sendToServer = async (
-    task: string,
+  const getGiriFromServer = async ()=>{
+    return(await GiriFromServer('getGiri',''));
+}
+const getGiro = async (id:string)=>{
+  return(await GiriFromServer('statoGiro',id));
+}
+const GiriFromServer = async (task: string, id:string)=>{
+    let risposta: any;
+    let azienda: string;
+      azienda = localStorage.azienda;
+    if (azienda === undefined)
+        azienda = 'F';
+    const url =
+    "http://frauweb.frau.it/spedizioni/ajax/index.php?action=ajax&task="+task+"&id_giro="+id+'&azienda_produzione='+azienda ;
+    const config = {
+      url,
+      method: "get",
+      headers: { Accept: "application/json, text/plain, *" },
+    };
+    await axios
+      .request(config)
+      .then((response) => {
+  //      console.log(response.data);
+       risposta=response.data; 
+      
+     })
+      .catch((error) => {
+  //      console.log(error.message);
+        alert(error.message);
+      });
+    
+      return(risposta);
+  }
+    const sendToServer = async (
+      task: string,
     data: etichetta,
     status: number
   ) => {
@@ -142,5 +175,6 @@ export function Visual() {
     getEtichetta,
     getCollo,
     getStorage,
+    getGiriFromServer,getGiro
   };
 }

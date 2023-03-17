@@ -57,7 +57,7 @@ import {
   IonRouterOutlet,
   IonSplitPane,
 } from "@ionic/vue";
-/* import {
+import {
   archiveOutline,
   archiveSharp,
   heartOutline,
@@ -66,8 +66,7 @@ import {
   mailSharp,
   paperPlaneOutline,
   paperPlaneSharp,
-  
-} from 'ionicons/icons'; */
+} from "ionicons/icons";
 export default {
   data() {
     return {
@@ -113,11 +112,10 @@ export default {
         url: "/folder/etichetta",
       },
       {
-        title: "Fogli preparazione",
-        url: "/folder/Outbox",
-        /*        iosIcon: paperPlaneOutline,
-        mdIcon: paperPlaneSharp,
- */
+        title: "Giri da spedire",
+        url: "/folder/giri",
+        //       iosIcon: paperPlaneOutline,
+        //       mdIcon: paperPlaneSharp,
       },
       {
         title: "DDT emesse",

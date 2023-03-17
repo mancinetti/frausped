@@ -3,6 +3,7 @@ import { RouteRecordRaw } from 'vue-router';
 import LoginPage from '../views/LoginPage.vue'
 import LeggiEtichetta from '../views/LeggiEtichetta.vue'
 import LeggiCollo from '../views/LeggiCollo.vue'
+import VediGiri from '../views/VediGiri.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -27,6 +28,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/folder/collo',
     name: 'Collo',
     component: LeggiCollo
+  },
+  {
+    path: '/folder/giri',
+    name: 'Giri',
+    component: VediGiri
   },
   {
     path: '/folder/:id',

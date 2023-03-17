@@ -98,6 +98,7 @@ export default {
           const currentDate = cDate.slice(0, 10);
           //    this.storage.set("data_login", currentDate);
           localStorage.data_login = currentDate;
+          localStorage.giro_corrente = "";
           self.location.href = "/";
           //          routeRedirect.setAttribute("to", "/folder/etichetta");
           return "200";

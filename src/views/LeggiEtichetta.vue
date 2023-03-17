@@ -2,7 +2,12 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>Gestione colli - Legge Etichetta spedizione</ion-title>
+        <ion-title
+          >Etichetta spedizione<br />
+          Giro {{ descrizione_giro }} {{ stato_giro.totcol }}/{{ stato_giro.tocolpre }}/{{
+            stato_giro.tocolnop
+          }}</ion-title
+        >
         <ion-buttons slot="start">
           <ion-menu-button color="primary"></ion-menu-button>
         </ion-buttons>
@@ -56,7 +61,7 @@
         <div class="reader_ok" v-if="lettura == 1">Etichetta letta</div>
       </ion-item>
       <ion-button v-if="lettura == 0" type="button" @Click="Leggi()"
-        >Leggi Codice
+        >Leggi Etichetta Spedizione
       </ion-button>
       <ion-button
         v-if="lettura == 1"
@@ -79,7 +84,7 @@ import { ref, onMounted } from "vue";
 import { leggiBarcode } from "@/composables/leggiBarcode";
 import { Visual } from "@/composables/Visual";
 const { BarQrCode, Test, retDebuData } = leggiBarcode();
-const { sendToServer, getEtichetta, getStorage } = Visual();
+const { sendToServer, getEtichetta, getStorage, getGiro } = Visual();
 import { IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from "@ionic/vue";
 import { useRouter } from "vue-router";
 
@@ -115,7 +120,8 @@ export default {
 
   setup(props) {
     const lettura = ref(0);
-
+    const descrizione_giro = ref("");
+    const stato_giro = ref({});
     const mess = ref("");
     const attesa = ref("");
     const cl = ref("red");
@@ -130,6 +136,9 @@ export default {
     const decod_sede = ref();
     const etichetta_letta = ref(0);
     console.log(props);
+    async function getNumeriGiro(id_giro) {
+      stato_giro.value = await getGiro(id_giro);
+    }
     async function LeggiCodice() {
       //      cl.value = sendAudio({ flag: true });
       //     console.log(cl.value);
@@ -214,12 +223,22 @@ export default {
         console.log("mounted");
         cl.value = "";
         lettura.value = 0;
+        const tmpgiro = localStorage.giro_corrente;
+        if (tmpgiro === "") {
+          descrizione_giro.value = "";
+          self.location.href = "/folder/giri";
+        } else {
+          const vtmp = tmpgiro.split("|");
+          descrizione_giro.value = vtmp[1];
+          getNumeriGiro(vtmp[0]);
+        }
       }
     );
     return {
       LeggiCodice,
       BarQrCode,
       getEtichetta,
+      getNumeriGiro,
       Test,
       mess,
       cl,
@@ -234,6 +253,8 @@ export default {
       cliente,
       decod_sede,
       etichetta_letta,
+      descrizione_giro,
+      stato_giro,
     };
   },
 };
@@ -255,6 +276,7 @@ export default {
   display: block;
   background-color: red;
 }
+
 .reader_pronto {
   text-align: center;
   width: 150px;
@@ -265,6 +287,7 @@ export default {
   border-radius: 25px;
   background-color: rgb(90, 138, 168);
 }
+
 .reader_ok {
   text-align: center;
   width: 150px;
@@ -275,6 +298,7 @@ export default {
   border-radius: 25px;
   background-color: green;
 }
+
 .green {
   margin-top: 50px;
   margin-left: 20px;
@@ -283,9 +307,11 @@ export default {
   display: block;
   background-color: green;
 }
+
 .card {
   margin-left: 0px !important;
 }
+
 .field {
   margin-left: 5px;
   font-weight: bold;
