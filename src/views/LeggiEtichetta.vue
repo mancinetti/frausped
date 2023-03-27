@@ -64,10 +64,16 @@
         >Leggi Etichetta Spedizione
       </ion-button>
       <ion-button
-        v-if="lettura == 1"
+        v-if="lettura == 1 && sciolte == '0'"
         type="button"
         @click="() => $router.push({ path: '/folder/collo' })"
         >Leggi Collo
+      </ion-button>
+      <ion-button
+        v-if="lettura == 1 && sciolte == '1'"
+        type="button"
+        @click="() => $router.push({ path: '/folder/sciolti' })"
+        >Conferma Paia Sciolte
       </ion-button>
       <ion-button v-if="lettura == 1" type="button" @click="Leggi()"
         >Rileggi Et.
@@ -120,12 +126,13 @@ export default {
 
   setup(props) {
     const lettura = ref(0);
+    const sciolte = ref(0);
     const descrizione_giro = ref("");
     const stato_giro = ref({});
     const mess = ref("");
     const attesa = ref("");
     const cl = ref("red");
-    const web = 0;
+    const web = 1;
     const etich = ref({});
     const router = useRouter();
     const progressivo = ref("");
@@ -200,6 +207,11 @@ export default {
         localStorage.etichetta = etich_area;
         lettura.value = 1;
       }
+      if (codice.value.length == 11) {
+        sciolte.value = 1;
+      } else {
+        sciolte.value = 0;
+      }
       document.querySelector("body").classList.remove("scanner-active");
       //    getStorage();
       //   let isPaused = false;
@@ -246,6 +258,7 @@ export default {
       router,
       getStorage,
       lettura,
+      sciolte,
       foglio,
       progressivo,
       destinatario,
