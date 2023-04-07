@@ -25,6 +25,17 @@
             success-message=" "
           />
         </ion-item>
+        <ion-item>
+          <label for="sede">Sede di preparazione: &nbsp;&nbsp;</label>
+          <select id="sede_preparazione" v-model="sede_selected">
+            <option v-for="s in sedi" :key="s" :value="s.value">
+              {{ s.text }}
+            </option>
+          </select>
+          <div class="help-message">
+            {{ errorMessage }}
+          </div>
+        </ion-item>
         <ion-item
           ><span class="errore">{{ message }}</span>
           <input type="hidden" id="update" name="update" value=""
@@ -66,11 +77,34 @@ export default {
       response: {},
     };
   },
+
   setup() {
     const message = ref("");
+    const errorMessage = ref("");
+    const sedi = ref([{}]);
+
+    const sede_selected = ref("");
+    if (localStorage.sede_preparazione != undefined)
+      sede_selected.value = localStorage.sede_preparazione;
+    const obj = [
+      {
+        value: "F",
+        text: "San Giovanni",
+      },
+      {
+        value: "M",
+        text: "Montecchia",
+      },
+    ];
+
+    sedi.value = obj;
     // const router = useRouter();
     async function onSubmit(values) {
       console.log(values);
+      if (document.getElementById("sede_preparazione").value == undefined) {
+        errorMessage.value = "Selezionare una sede di preparazione";
+        return;
+      }
       const url =
         "http://frauweb.frau.it/spedizioni/ajax/index.php?action=ajax&task=checklogin";
 
@@ -99,6 +133,10 @@ export default {
           //    this.storage.set("data_login", currentDate);
           localStorage.data_login = currentDate;
           localStorage.giro_corrente = "";
+          localStorage.sede_preparazione = document.getElementById(
+            "sede_preparazione"
+          ).value;
+
           self.location.href = "/";
           //          routeRedirect.setAttribute("to", "/folder/etichetta");
           return "200";
@@ -126,6 +164,7 @@ export default {
     const schema = Yup.object().shape({
       username: Yup.string().required(),
       password: Yup.string().required(),
+      //      sede: Yup.string().required(),
     });
 
     return {
@@ -133,6 +172,9 @@ export default {
       schema,
       onInvalidSubmit,
       message,
+      errorMessage,
+      sedi,
+      sede_selected,
     };
   },
   methods: {},
@@ -215,5 +257,8 @@ input + span {
 
 button {
   margin-top: 20px;
+}
+.help-message {
+  color: red;
 }
 </style>

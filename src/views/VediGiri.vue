@@ -13,7 +13,8 @@
       <ion-grid class="grid-font ion-margin" :fixed="true">
         <ion-row style="background-color: grey">
           <ion-col size="1"></ion-col>
-          <ion-col size="4">Giro </ion-col>
+          <ion-col size="1">Sede </ion-col>
+          <ion-col size="3">Giro </ion-col>
           <ion-col size="4">Corriere </ion-col>
           <ion-col size="1" style="text-align: right">Co </ion-col>
           <ion-col size="1" style="text-align: right">Pr</ion-col>
@@ -27,19 +28,20 @@
           <ion-col size="1" class="ion-text-center">
             <input
               type="radio"
-              v-if="item.id_giro != selected"
+              v-if="item.azienda_produzione == azicorr && item.id_giro != selected"
               :value="item.id_giro"
               :id="'radio' + item.id_giro"
               v-model="selected"
             />
 
             <ion-icon
-              v-if="item.id_giro == selected"
+              v-if="item.azienda_produzione == azicorr && item.id_giro == selected"
               :md="mdicon"
               :id="'sel' + item.id_giro"
             ></ion-icon>
           </ion-col>
-          <ion-col size="4"> {{ item.descrizione_giro }} </ion-col>
+          <ion-col size="1"> {{ item.azienda_produzione }} </ion-col>
+          <ion-col size="3"> {{ item.descrizione_giro }} </ion-col>
           <ion-col size="4">
             {{ item.denominazione_vettore }}
           </ion-col>
@@ -126,6 +128,8 @@ export default {
     const selected = ref(0);
     const el_checked = ref(false);
     const tmpgiro = localStorage.giro_corrente;
+    const azicorr = ref(localStorage.sede_preparazione);
+
     if (tmpgiro === undefined || tmpgiro == "") {
       selected.value = "";
     } else {
@@ -138,7 +142,7 @@ export default {
     onMounted(() => {
       getItems();
     });
-    return { getItems, items, selected, mdicon, el_checked };
+    return { getItems, items, selected, mdicon, el_checked, azicorr };
   },
 };
 </script>

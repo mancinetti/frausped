@@ -4,7 +4,10 @@ import LoginPage from '../views/LoginPage.vue'
 import LeggiEtichetta from '../views/LeggiEtichetta.vue'
 import LeggiCollo from '../views/LeggiCollo.vue'
 import VediGiri from '../views/VediGiri.vue'
-
+import ConfermaSciolti from '../views/ConfermaSciolti.vue'
+/* import VediDdt from '../views/VediDddt.vue'
+import Settings from '../views/Settings.vue'
+ */
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -25,6 +28,10 @@ const routes: Array<RouteRecordRaw> = [
     component: LeggiEtichetta
   },
   {
+    path: '/folder/sciolti',
+    component: ConfermaSciolti
+  },
+  {
     path: '/folder/collo',
     name: 'Collo',
     component: LeggiCollo
@@ -34,6 +41,16 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Giri',
     component: VediGiri
   },
+ /*  {
+    path: '/folder/settings',
+    name: 'Settings',
+    component: Settings
+  },
+  {
+    path: '/folder/ddt',
+    name: 'Ddt',
+    component: VediDdt
+  }, */
   {
     path: '/folder/:id',
     component: () => import ('../views/FolderPage.vue')

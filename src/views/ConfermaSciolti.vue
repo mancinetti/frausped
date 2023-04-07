@@ -14,15 +14,10 @@
       </ion-toolbar>
     </ion-header>
     <div id="container">
-      <div class="scanner-wrapper">
-        <div class="camera"></div>
-      </div>
-    </div>
-    <div v-if="etichetta_letta == 1">
       <div class="card">
         <ion-item>
-          <div class="item item-divider">
-            <b>Etichetta letta: (sede {{ decod_sede }})</b>
+          <div class="item item-divider sciolte">
+            <b>Etichetta Per Paia Sciolte </b>
           </div>
         </ion-item>
         <ion-item>
@@ -43,7 +38,6 @@
           <div class="field">{{ decod_sede[sede] }}</div>
         </ion-item>
  -->
-
         <ion-item>
           <p>Foglio preparazione:</p>
           <div class="field">{{ foglio }}</div>
@@ -54,44 +48,26 @@
             <b>{{ codice }}</b>
           </div>
         </ion-item>
-        <div v-if="sciolte == 1" class="sciolte">PAIA SCIOLTE</div>
+        <ion-item>
+          <p>Paia:</p>
+          <div class="field">
+            <b>{{ taglie }}</b>
+          </div>
+        </ion-item>
       </div>
     </div>
     <ion-toolbar>
-      <ion-item>
-        <div class="reader_pronto" v-if="lettura == 0">Pronto per la lettura</div>
-        <div class="reader_ok" v-if="lettura == 1">Etichetta letta</div>
-      </ion-item>
-      <ion-button v-if="lettura == 0" type="button" @Click="Leggi()"
-        >Leggi Etichetta Spedizione
+      <ion-button type="button" @click="Conferma()">Conferma </ion-button>
+      <ion-button v-if="lettura == 1" type="button" @click="GoEtichetta()"
+        >Rileggi Etichetta
       </ion-button>
-      <ion-button
-        v-if="lettura == 1 && sciolte == '0'"
-        type="button"
-        @click="() => $router.push({ path: '/folder/collo' })"
-        >Leggi Collo
-      </ion-button>
-      <ion-button
-        v-if="lettura == 1 && sciolte == '1'"
-        type="button"
-        @click="() => $router.push({ path: '/folder/sciolti' })"
-        >Conferma Paia Sciolte
-      </ion-button>
-      <ion-button v-if="lettura == 1" type="button" @click="Leggi()"
-        >Rileggi Et.
-      </ion-button>
-      <!--       <div v-if="cl == 'red'" class="red">{{ mess }}</div>
-      <div v-if="cl == 'green'" class="green">{{ mess }}</div>
- -->
     </ion-toolbar>
   </ion-page>
 </template>
 
 <script>
 import { ref, onMounted } from "vue";
-import { leggiBarcode } from "@/composables/leggiBarcode";
 import { Visual } from "@/composables/Visual";
-const { BarQrCode, Test, retDebuData } = leggiBarcode();
 const { sendToServer, getEtichetta, getStorage, getGiro } = Visual();
 import { IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from "@ionic/vue";
 import { useRouter } from "vue-router";
@@ -108,21 +84,13 @@ export default {
     update: String,
   },
   methods: {
-    Leggi() {
-      //   this.stopInte();
-      this.lettura = 0;
-      this.LeggiCodice();
-      /*       this.mess = this.TestStatus();
-      this.cl = this.sendAudio({ flag: true });
-      alert("cl" + this.cl + this.mess);
- */
-    },
-    GoCollo() {
-      self.location.href = "/folder/collo";
-    },
     GoEtichetta() {
       self.location.href = "/folder/etichetta";
       //     this.router.push({ path: '/folder/collo' })
+    },
+    Conferma() {
+      this.SetSciolte();
+      this.GoEtichetta();
     },
   },
 
@@ -144,27 +112,30 @@ export default {
     const destinatario = ref("");
     const decod_sede = ref();
     const etichetta_letta = ref(0);
+    const taglie = ref("");
     console.log(props);
     async function getNumeriGiro(id_giro) {
       stato_giro.value = await getGiro(id_giro);
     }
+    async function SetSciolte() {
+      const dati_etich = localStorage.etichetta;
+      const etich = getEtichetta(dati_etich);
+      const res = await sendToServer("receive", etich, 0);
+      //       alert("risposta = " + res);
+      if (res == "200") {
+        mess.value = "risposta dal server: Etichetta aggiornata:Collo Mancante";
+        cl.value = "green";
+      } else if (res == "99") {
+        mess.value = "risposta dal server: Errore comunicazione";
+        cl.value = "red";
+      }
+      lettura.value = 1;
+    }
     async function LeggiCodice() {
-      //      cl.value = sendAudio({ flag: true });
-      //     console.log(cl.value);
-      etichetta_letta.value = 0;
-      document.querySelector("body").classList.add("body.scanner-active");
-      //      alert("lettura qr/bc");
-      let etich_area = "";
-      if (web == 1) etich_area = retDebuData();
-      else etich_area = await BarQrCode();
-      //    alert(etich_area);
+      const etich_area = localStorage.etichetta;
       etich.value = getEtichetta(etich_area);
       //    console.log(etich.value);
       foglio.value = etich.value.num_foglio;
-      if (foglio.value == "9999999") {
-        alert("Il codice letto non è un'etichetta di spedizione");
-        return;
-      }
       const sede = etich.value.sede;
       switch (sede) {
         case "F":
@@ -175,6 +146,18 @@ export default {
           break;
       }
       codice.value = etich.value.codice;
+      const tmp = etich.value.taglie;
+      taglie.value = "";
+      const vtmp = tmp.split(";");
+
+      const len = vtmp.length;
+      for (let j = 0; j < len; j++) {
+        const vtag = vtmp[j].split("-");
+        console.log(vtag);
+        if (parseInt(vtag[1]) > 0) {
+          taglie.value = taglie.value + vtag[0] + " = " + vtag[1] + "  ";
+        }
+      }
       progressivo.value =
         etich.value.num_ordine +
         "/" +
@@ -214,19 +197,6 @@ export default {
       } else {
         sciolte.value = 0;
       }
-      document.querySelector("body").classList.remove("scanner-active");
-      //    getStorage();
-      //   let isPaused = false;
-      /*       let int = setInterval(function () {
-        if (!isPaused) {
-          elapsedTime++;
-          if (elapsedTime == 20) {
-            cl.value = sendAudio({ flag: false });
-            attesa.value = "";
-          } else attesa.value = "Elapsed Seconds: " + elapsedTime;
-        }
-      }, 10);
- */
     }
     /*     const stopInte = () => {
       clearInterval(int.value);
@@ -234,6 +204,7 @@ export default {
     };
  */ onMounted(
       () => {
+        LeggiCodice();
         console.log("mounted");
         cl.value = "";
         lettura.value = 0;
@@ -250,10 +221,10 @@ export default {
     );
     return {
       LeggiCodice,
-      BarQrCode,
+
       getEtichetta,
       getNumeriGiro,
-      Test,
+
       mess,
       cl,
       attesa,
@@ -270,6 +241,8 @@ export default {
       etichetta_letta,
       descrizione_giro,
       stato_giro,
+      taglie,
+      SetSciolte,
     };
   },
 };
@@ -312,19 +285,6 @@ export default {
   border-color: 1px solid blue;
   border-radius: 25px;
   background-color: green;
-}
-.sciolte {
-  text-align: center;
-  padding: 10px;
-  width: 250px;
-  height: 40px;
-  font-size: large;
-  font-weight: bold;
-  margin-left: 3em;
-  margin-right: 20px;
-  border-color: 1px solid blue;
-  border-radius: 25px;
-  background-color: rgb(205, 208, 23);
 }
 
 .green {
@@ -388,6 +348,20 @@ body.scanner-active {
   color: #8c8c8c;
 
   margin: 0;
+}
+.sciolte {
+  text-align: center;
+  padding: 10px;
+  width: 400px;
+  height: 40px;
+  font-size: large;
+  font-weight: bold;
+  margin-left: 3em;
+  margin-right: 20px;
+  color: white;
+  border-color: 1px solid rgb(3, 20, 13);
+  border-radius: 25px;
+  background-color: rgb(8, 71, 33);
 }
 
 #container a {
