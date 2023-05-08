@@ -101,7 +101,7 @@ export default {
     // const router = useRouter();
     async function onSubmit(values) {
       console.log(values);
-      if (document.getElementById("sede_preparazione").value == undefined) {
+      if (document.getElementById("sede_preparazione").value == "") {
         errorMessage.value = "Selezionare una sede di preparazione";
         return;
       }

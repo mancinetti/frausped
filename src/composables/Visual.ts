@@ -57,12 +57,10 @@ const getGiro = async (id:string)=>{
 }
 const GiriFromServer = async (task: string, id:string)=>{
     let risposta: any;
-    let azienda: string;
-      azienda = localStorage.azienda;
-    if (azienda === undefined)
-        azienda = 'F';
+    const azienda = localStorage.sede_preparazione;
+     
     const url =
-    "http://frauweb.frau.it/spedizioni/ajax/index.php?action=ajax&task="+task+"&id_giro="+id+'&azienda_produzione='+azienda ;
+    "http://frauweb.frau.it/spedizioni/ajax/index.php?action=ajax&task="+task+"&id_giro="+id+'&sede_preparazione='+azienda ;
     const config = {
       url,
       method: "get",
@@ -119,10 +117,10 @@ const GiriFromServer = async (task: string, id:string)=>{
         alert("error " + error.message);
         console.error("There was an error!", error.message);
       });
-    console.log("storage", storage);
+/*     console.log("storage", storage);
     const resp = await storage.get("test");
     console.log("risposta storage", resp);
-
+ */
     return risposta;
   };
   const getStorage = async () => {

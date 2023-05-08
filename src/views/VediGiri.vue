@@ -13,12 +13,13 @@
       <ion-grid class="grid-font ion-margin" :fixed="true">
         <ion-row style="background-color: grey">
           <ion-col size="1"></ion-col>
-          <ion-col size="1">Sede </ion-col>
-          <ion-col size="3">Giro </ion-col>
+          <!--          <ion-col size="1">Sede </ion-col>
+ -->
+          <ion-col size="4">Giro </ion-col>
           <ion-col size="4">Corriere </ion-col>
-          <ion-col size="1" style="text-align: right">Co </ion-col>
-          <ion-col size="1" style="text-align: right">Pr</ion-col>
-          <ion-col size="1" style="text-align: right">Nop</ion-col>
+          <ion-col size="1" style="text-align: center">Co </ion-col>
+          <ion-col size="1" style="text-align: center">Pr</ion-col>
+          <ion-col size="1" style="text-align: center">Nop</ion-col>
         </ion-row>
         <ion-row
           v-for="item in items"
@@ -40,18 +41,22 @@
               :id="'sel' + item.id_giro"
             ></ion-icon>
           </ion-col>
-          <ion-col size="1"> {{ item.azienda_produzione }} </ion-col>
-          <ion-col size="3"> {{ item.descrizione_giro }} </ion-col>
+          <!--           <ion-col size="1"> {{ item.azienda_produzione }} </ion-col>
+ -->
+          <ion-col size="4">
+            {{ item.descrizione_giro }}
+          </ion-col>
+
           <ion-col size="4">
             {{ item.denominazione_vettore }}
           </ion-col>
-          <ion-col size="1" style="text-align: right">
+          <ion-col size="1" style="text-align: center">
             {{ item.totcol }}
           </ion-col>
-          <ion-col size="1" style="text-align: right">
+          <ion-col size="1" style="text-align: center">
             {{ item.tocolpre }}
           </ion-col>
-          <ion-col size="1" style="text-align: right">
+          <ion-col size="1" style="text-align: center">
             {{ item.tocolnop }}
           </ion-col>
         </ion-row>

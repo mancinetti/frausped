@@ -2,11 +2,15 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title
-          >Etichetta spedizione<br />
-          Giro {{ descrizione_giro }} {{ stato_giro.totcol }}/{{ stato_giro.tocolpre }}/{{
-            stato_giro.tocolnop
-          }}</ion-title
+        <ion-title class="title"
+          >Etichetta spedizione {{ decod_sede }}<br />
+          Giro <b>{{ descrizione_giro }}</b
+          ><br />
+          Colli: <span style="color: blue">{{ stato_giro.totcol }}</span
+          >/
+          <span style="color: white; background-color: green">
+            {{ stato_giro.tocolpre }}</span
+          >/ <span style="color: red"> {{ stato_giro.tocolnop }}</span></ion-title
         >
         <ion-buttons slot="start">
           <ion-menu-button color="primary"></ion-menu-button>
@@ -22,7 +26,7 @@
       <div class="card">
         <ion-item>
           <div class="item item-divider">
-            <b>Etichetta letta: (sede {{ decod_sede }})</b>
+            <b>Etichetta letta: (sede {{ decod_letta }})</b>
           </div>
         </ion-item>
         <ion-item>
@@ -134,7 +138,7 @@ export default {
     const mess = ref("");
     const attesa = ref("");
     const cl = ref("red");
-    const web = 1;
+    const web = 0;
     const etich = ref({});
     const router = useRouter();
     const progressivo = ref("");
@@ -143,6 +147,7 @@ export default {
     const cliente = ref("");
     const destinatario = ref("");
     const decod_sede = ref();
+    const decod_letta = ref();
     const etichetta_letta = ref(0);
     console.log(props);
     async function getNumeriGiro(id_giro) {
@@ -166,14 +171,12 @@ export default {
         return;
       }
       const sede = etich.value.sede;
-      switch (sede) {
-        case "F":
-          decod_sede.value = "San giovanni";
-          break;
-        case "M":
-          decod_sede.value = "Montecchia";
-          break;
+      decod_letta.value = decodSede(sede);
+      if (localStorage.sede_preparazione != sede) {
+        alert("Il codice letto è della sede " + decod_letta.value);
+        return;
       }
+
       codice.value = etich.value.codice;
       progressivo.value =
         etich.value.num_ordine +
@@ -189,7 +192,7 @@ export default {
       etichetta_letta.value = 1;
       const res = await sendToServer("checkSped", etich.value, 1);
       console.log("risposta = ", res);
-      if (res == "200" || web == 1) {
+      if (res == "200") {
         localStorage.etichetta = etich_area;
         lettura.value = 1;
       } else if (res == "99") alert("Etichetta non trovata sul server");
@@ -228,13 +231,25 @@ export default {
       }, 10);
  */
     }
+    function decodSede(sede) {
+      switch (sede) {
+        case "F":
+          return "San giovanni";
+
+        case "M":
+          return "Montecchia";
+        default:
+          return "";
+      }
+    }
+
     /*     const stopInte = () => {
       clearInterval(int.value);
       elapsedTime = 0;
     };
  */ onMounted(
       () => {
-        console.log("mounted");
+        decod_sede.value = decodSede(localStorage.sede_preparazione);
         cl.value = "";
         lettura.value = 0;
         const tmpgiro = localStorage.giro_corrente;
@@ -267,6 +282,7 @@ export default {
       codice,
       cliente,
       decod_sede,
+      decod_letta,
       etichetta_letta,
       descrizione_giro,
       stato_giro,
@@ -353,7 +369,10 @@ export default {
   display: block;
   border-color: 1px solid blue;
 }
-
+.title {
+  font-size: 0.8em;
+  color: blue;
+}
 body.scanner-active {
   --background: transparent;
   --ion-background-color: transparent;

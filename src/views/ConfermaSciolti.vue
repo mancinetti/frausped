@@ -56,10 +56,16 @@
         </ion-item>
       </div>
     </div>
+    <ion-item v-if="lettura == 1 || lettura == 9">
+      <div v-if="cl == 'red'" class="red">{{ mess }}</div>
+      <div v-if="cl == 'green'" class="green">{{ mess }}</div>
+    </ion-item>
     <ion-toolbar>
-      <ion-button type="button" @click="Conferma()">Conferma </ion-button>
+      <ion-button v-if="lettura != 1" type="button" @click="Conferma()"
+        >Conferma
+      </ion-button>
       <ion-button v-if="lettura == 1" type="button" @click="GoEtichetta()"
-        >Rileggi Etichetta
+        >Leggi Etichetta
       </ion-button>
     </ion-toolbar>
   </ion-page>
@@ -90,7 +96,7 @@ export default {
     },
     Conferma() {
       this.SetSciolte();
-      this.GoEtichetta();
+      //      this.GoEtichetta();
     },
   },
 
@@ -102,7 +108,7 @@ export default {
     const mess = ref("");
     const attesa = ref("");
     const cl = ref("red");
-    const web = 1;
+    const web = 0;
     const etich = ref({});
     const router = useRouter();
     const progressivo = ref("");
@@ -120,10 +126,10 @@ export default {
     async function SetSciolte() {
       const dati_etich = localStorage.etichetta;
       const etich = getEtichetta(dati_etich);
-      const res = await sendToServer("receive", etich, 0);
-      //       alert("risposta = " + res);
+      let res = await sendToServer("receive", etich, 1);
+      res = res.substr(0, 3);
       if (res == "200") {
-        mess.value = "risposta dal server: Etichetta aggiornata:Collo Mancante";
+        mess.value = "risposta dal server: Etichetta aggiornata";
         cl.value = "green";
       } else if (res == "99") {
         mess.value = "risposta dal server: Errore comunicazione";
@@ -172,9 +178,9 @@ export default {
       etichetta_letta.value = 1;
       const res = await sendToServer("checkSped", etich.value, 1);
       console.log("risposta = ", res);
-      if (res == "200" || web == 1) {
+      if (res == "200") {
         localStorage.etichetta = etich_area;
-        lettura.value = 1;
+        lettura.value = 0;
       } else if (res == "99") alert("Etichetta non trovata sul server");
       else if (res == "90") alert("Sede non coerente");
       else if (res == "91") alert("Etichetta già preparata");
@@ -185,12 +191,12 @@ export default {
           ) == true
         ) {
           localStorage.etichetta = etich_area;
-          lettura.value = 1;
+          lettura.value = 9;
         }
       } else {
         alert(res);
         localStorage.etichetta = etich_area;
-        lettura.value = 1;
+        lettura.value = 9;
       }
       if (codice.value.length == 11) {
         sciolte.value = 1;
@@ -257,10 +263,10 @@ export default {
 }
 
 .red {
-  margin-top: 50px;
-  margin-left: 20px;
+  margin-top: 100px;
+  margin-left: 50px;
   width: 200px;
-  height: 200px;
+  height: 100px;
   display: block;
   background-color: red;
 }
@@ -288,10 +294,10 @@ export default {
 }
 
 .green {
-  margin-top: 50px;
-  margin-left: 20px;
+  margin-top: 100px;
+  margin-left: 50px;
   width: 200px;
-  height: 200px;
+  height: 100px;
   display: block;
   background-color: green;
 }

@@ -12,7 +12,8 @@ export function leggiBarcode() {
   };
   const retDebuData = () => {
    //const testetic="257237|  2|  1|F|070117|      |41L7NEstE  |35976|  2|17|2021|2|MONTI DI MONTI V.& F.  snc    |  ";
-   const testetic="256933|13|1|F|070600|51|95L7NERO039|35488|7||2021|2|GASPERONIGIANLUCA|GASPERONIGIANLUCA||17|35-0;36-0;37-0;38-0;39-0;40-0;41-2";
+   //const testetic="256933|13|1|M|070600|51|95L7NERO039|35488|7||2021|2|GASPERONIGIANLUCA|GASPERONIGIANLUCA||17|35-0;36-0;37-0;38-0;39-0;40-0;41-2";
+   const testetic="272639|  4|  1|F|070104|      |28P0OFFW015|40379|  4|  |2023|1|MICHELETTI V. & C. snc        |                              ||17|35-0;36-0;37-0;38-0;39-0;40-0;41-2       "
    return(testetic);
 };
 const retDebuCollo = () => {
