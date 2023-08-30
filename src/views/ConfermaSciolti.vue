@@ -65,7 +65,7 @@
         >Conferma
       </ion-button>
       <ion-button v-if="lettura == 1" type="button" @click="GoEtichetta()"
-        >Leggi Etichetta
+        >vai a Lettura Etichette
       </ion-button>
     </ion-toolbar>
   </ion-page>
@@ -96,7 +96,7 @@ export default {
     },
     Conferma() {
       this.SetSciolte();
-      //      this.GoEtichetta();
+      // this.GoEtichetta();
     },
   },
 
@@ -108,7 +108,7 @@ export default {
     const mess = ref("");
     const attesa = ref("");
     const cl = ref("red");
-    const web = 0;
+    // const web = 0;
     const etich = ref({});
     const router = useRouter();
     const progressivo = ref("");
@@ -126,16 +126,19 @@ export default {
     async function SetSciolte() {
       const dati_etich = localStorage.etichetta;
       const etich = getEtichetta(dati_etich);
-      let res = await sendToServer("receive", etich, 1);
-      res = res.substr(0, 3);
-      if (res == "200") {
+      const res = await sendToServer("receive", etich, 1);
+      const result = res.toString();
+      //  console.log(res);
+
+      lettura.value = 1;
+      if (result.substr(0, 3) == "200") {
         mess.value = "risposta dal server: Etichetta aggiornata";
         cl.value = "green";
       } else if (res == "99") {
         mess.value = "risposta dal server: Errore comunicazione";
         cl.value = "red";
       }
-      lettura.value = 1;
+      //     alert(mess.value);
     }
     async function LeggiCodice() {
       const etich_area = localStorage.etichetta;
@@ -214,10 +217,10 @@ export default {
         console.log("mounted");
         cl.value = "";
         lettura.value = 0;
-        const tmpgiro = localStorage.giro_corrente;
+        const tmpgiro = localStorage.sessione_corrente;
         if (tmpgiro === "") {
           descrizione_giro.value = "";
-          self.location.href = "/folder/giri";
+          self.location.href = "/folder/sessioni";
         } else {
           const vtmp = tmpgiro.split("|");
           descrizione_giro.value = vtmp[1];

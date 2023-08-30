@@ -119,7 +119,7 @@ export default {
               "Confermi la selezione del giro " + this.items[i].descrizione_giro
             ) == true
           ) {
-            localStorage.giro_corrente =
+            localStorage.sessione_corrente =
               this.items[i].id_giro + "|" + this.items[i].descrizione_giro;
             self.location.href = "/folder/etichetta";
           }
@@ -132,7 +132,7 @@ export default {
     const items = ref([{}]);
     const selected = ref(0);
     const el_checked = ref(false);
-    const tmpgiro = localStorage.giro_corrente;
+    const tmpgiro = localStorage.sessione_corrente;
     const azicorr = ref(localStorage.sede_preparazione);
 
     if (tmpgiro === undefined || tmpgiro == "") {

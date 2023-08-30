@@ -11,9 +11,11 @@ export function leggiBarcode() {
    alert('test')
   };
   const retDebuData = () => {
-   //const testetic="257237|  2|  1|F|070117|      |41L7NEstE  |35976|  2|17|2021|2|MONTI DI MONTI V.& F.  snc    |  ";
+//  const testetic="257427| 27|  1|F|043613|      |B910OLIV99 |39752| 74|  |2023|2|TERESI CALZATURE srl      ";
+//  const testetic="257237|  2|  1|F|070117|      |41L7NEstE  |35976|  2|17|2021|2|MONTI DI MONTI V.& F.  snc    |  ";
    //const testetic="256933|13|1|M|070600|51|95L7NERO039|35488|7||2021|2|GASPERONIGIANLUCA|GASPERONIGIANLUCA||17|35-0;36-0;37-0;38-0;39-0;40-0;41-2";
-   const testetic="272639|  4|  1|F|070104|      |28P0OFFW015|40379|  4|  |2023|1|MICHELETTI V. & C. snc        |                              ||17|35-0;36-0;37-0;38-0;39-0;40-0;41-2       "
+    const testetic="273439| 0|  1|F|060400|      |09A0VISOZ  |39639| 10|  |2023|2|BASSAN SHOES di ULIVIANO BASSA|                              |                              |  16|";                                                                                                                                                                                                                                                          
+    
    return(testetic);
 };
 const retDebuCollo = () => {

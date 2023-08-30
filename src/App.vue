@@ -112,8 +112,8 @@ export default {
         url: "/folder/etichetta",
       },
       {
-        title: "Giri da spedire",
-        url: "/folder/giri",
+        title: "Sessioni aperte",
+        url: "/folder/sessioni",
         //       iosIcon: paperPlaneOutline,
         //       mdIcon: paperPlaneSharp,
       },

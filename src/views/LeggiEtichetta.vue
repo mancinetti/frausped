@@ -4,14 +4,18 @@
       <ion-toolbar>
         <ion-title class="title"
           >Etichetta spedizione {{ decod_sede }}<br />
-          Giro <b>{{ descrizione_giro }}</b
+          <b>{{ descrizione_sessione }}</b
           ><br />
-          Colli: <span style="color: blue">{{ stato_giro.totcol }}</span
+          Colli: <span style="color: blue">{{ stato_sessione.num_coas }}</span
+          >/ <span style="color: green"> {{ stato_sessione.num_corl }}</span
           >/
-          <span style="color: white; background-color: green">
-            {{ stato_giro.tocolpre }}</span
-          >/ <span style="color: red"> {{ stato_giro.tocolnop }}</span></ion-title
-        >
+          <span style="color: rgb(56, 9, 97)"> {{ stato_sessione.num_coba }}</span>
+          <br />
+          Avanzamento: <span style="color: blue">{{ avanzamento_sessione.tocoas }}</span
+          >/ <span style="color: green"> {{ avanzamento_sessione.torili }}</span
+          >/
+          <span style="color: rgb(56, 9, 97)"> {{ avanzamento_sessione.toboac }}</span>
+        </ion-title>
         <ion-buttons slot="start">
           <ion-menu-button color="primary"></ion-menu-button>
         </ion-buttons>
@@ -81,6 +85,12 @@
         @click="() => $router.push({ path: '/folder/sciolti' })"
         >Conferma Paia Sciolte
       </ion-button>
+      <ion-button
+        v-if="lettura == 1 && sciolte == '2'"
+        type="button"
+        @click="() => $router.push({ path: '/folder/borse' })"
+        >Conferma Borse/Accessori
+      </ion-button>
       <ion-button v-if="lettura == 1" type="button" @click="Leggi()"
         >Rileggi Et.
       </ion-button>
@@ -92,11 +102,11 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { leggiBarcode } from "@/composables/leggiBarcode";
 import { Visual } from "@/composables/Visual";
 const { BarQrCode, Test, retDebuData } = leggiBarcode();
-const { sendToServer, getEtichetta, getStorage, getGiro } = Visual();
+const { sendToServer, getEtichetta, getStorage, getAvanzamentoSessione } = Visual();
 import { IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from "@ionic/vue";
 import { useRouter } from "vue-router";
 
@@ -133,10 +143,12 @@ export default {
   setup(props) {
     const lettura = ref(0);
     const sciolte = ref(0);
-    const descrizione_giro = ref("");
-    const stato_giro = ref({});
+    const descrizione_sessione = ref("");
+    const stato_sessione = reactive({});
+    const avanzamento_sessione = reactive({});
     const mess = ref("");
     const attesa = ref("");
+    const id_sessione = ref(0);
     const cl = ref("red");
     const web = 0;
     const etich = ref({});
@@ -150,8 +162,15 @@ export default {
     const decod_letta = ref();
     const etichetta_letta = ref(0);
     console.log(props);
-    async function getNumeriGiro(id_giro) {
-      stato_giro.value = await getGiro(id_giro);
+    async function getNumeriSessione(id_sess) {
+      ///      stato_sessione.value = await getStatoSessione(id_sessione);
+      avanzamento_sessione.value = await getAvanzamentoSessione(id_sess);
+      avanzamento_sessione.tocoas = avanzamento_sessione.value.tocoas;
+      avanzamento_sessione.torili = avanzamento_sessione.value.torili;
+      avanzamento_sessione.toboac = avanzamento_sessione.value.toboac;
+      /*       avanzamento_sessione.num_corl = vtmp[3];
+      avanzamento_sessione.num_coba = vtmp[4];
+ */
     }
     async function LeggiCodice() {
       //      cl.value = sendAudio({ flag: true });
@@ -171,9 +190,21 @@ export default {
         return;
       }
       const sede = etich.value.sede;
+      const sessione = etich.value.sessione.trim();
       decod_letta.value = decodSede(sede);
       if (localStorage.sede_preparazione != sede) {
         alert("Il codice letto è della sede " + decod_letta.value);
+        return;
+      }
+      //      console.log(id_sessione, etich.value);
+      if (id_sessione.value != sessione && sessione != 0) {
+        alert(
+          "Il codice letto non appartiene alla sessione corrente " +
+            "\n corrente=" +
+            id_sessione.value +
+            "\nLetto=" +
+            sessione
+        );
         return;
       }
 
@@ -187,7 +218,9 @@ export default {
       cliente.value = etich.value.codice_cliente + " " + etich.value.ragione_sociale;
       if (etich.value.codice_destinatario.trim() != "")
         destinatario.value =
-          etich.value.codice_destinatario + " " + etich.value.ragione_destinatario;
+          etich.value.codice_destinatario +
+          " " +
+          etich.value.ragione_sociale_destinatario;
       else destinatario.value = "";
       etichetta_letta.value = 1;
       const res = await sendToServer("checkSped", etich.value, 1);
@@ -212,11 +245,15 @@ export default {
         localStorage.etichetta = etich_area;
         lettura.value = 1;
       }
-      if (codice.value.length == 11) {
+      const asso = codice.value.substr(8, 2);
+      const cod = codice.value.trim();
+      if (cod.length == 11) {
         sciolte.value = 1;
       } else {
-        sciolte.value = 0;
+        if (asso == "99" || asso == "CI") sciolte.value = 2;
+        else sciolte.value = 0;
       }
+      // console.log("*" + codice.value + "*", asso, sciolte.value);
       document.querySelector("body").classList.remove("scanner-active");
       //    getStorage();
       //   let isPaused = false;
@@ -252,14 +289,19 @@ export default {
         decod_sede.value = decodSede(localStorage.sede_preparazione);
         cl.value = "";
         lettura.value = 0;
-        const tmpgiro = localStorage.giro_corrente;
-        if (tmpgiro === "") {
-          descrizione_giro.value = "";
-          self.location.href = "/folder/giri";
+        const tmpsess = localStorage.sessione_corrente;
+        if (tmpsess === "") {
+          descrizione_sessione.value = "";
+          self.location.href = "/folder/sessioni";
         } else {
-          const vtmp = tmpgiro.split("|");
-          descrizione_giro.value = vtmp[1];
-          getNumeriGiro(vtmp[0]);
+          const vtmp = tmpsess.split("|");
+          id_sessione.value = vtmp[0];
+          descrizione_sessione.value = vtmp[1];
+          stato_sessione.num_coas = vtmp[2];
+          stato_sessione.num_corl = vtmp[3];
+          stato_sessione.num_coba = vtmp[4];
+
+          getNumeriSessione(id_sessione.value);
         }
       }
     );
@@ -267,7 +309,7 @@ export default {
       LeggiCodice,
       BarQrCode,
       getEtichetta,
-      getNumeriGiro,
+      getNumeriSessione,
       Test,
       mess,
       cl,
@@ -280,12 +322,14 @@ export default {
       progressivo,
       destinatario,
       codice,
+      id_sessione,
       cliente,
       decod_sede,
       decod_letta,
       etichetta_letta,
-      descrizione_giro,
-      stato_giro,
+      descrizione_sessione,
+      stato_sessione,
+      avanzamento_sessione,
     };
   },
 };

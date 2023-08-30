@@ -13,7 +13,7 @@ export interface st {
  */
 export interface etichetta {
   num_foglio: string;
-  tot_etichette: string;
+  sessione: string;
   progressivo: string;
   sede: string;
   codice_cliente: string;
@@ -52,8 +52,17 @@ export function Visual() {
   const getGiriFromServer = async ()=>{
     return(await GiriFromServer('getGiri',''));
 }
+const getSessioniFromServer = async (id:string)=>{
+  return(await SessioniFromServer('getSessioni',id));
+}
+const getAvanzamentoSessione = async (id:string)=>{
+  return(await SessioniFromServer('getAvanzamento',id));
+}
 const getGiro = async (id:string)=>{
   return(await GiriFromServer('statoGiro',id));
+}
+const getStatoSessione = async (id:string)=>{
+  return(await StatoSessioneFromServer(id));
 }
 const GiriFromServer = async (task: string, id:string)=>{
     let risposta: any;
@@ -80,7 +89,57 @@ const GiriFromServer = async (task: string, id:string)=>{
     
       return(risposta);
   }
-    const sendToServer = async (
+  const StatoSessioneFromServer = async (id:string)=>{
+    let risposta: any;
+    const azienda = localStorage.sede_preparazione;
+     
+    const url =
+    "http://frauweb.frau.it/spedizioni/ajax/index.php?action=ajax&task=statosessione&id_sessione="+id+'&sede_preparazione='+azienda ;
+    const config = {
+      url,
+      method: "get",
+      headers: { Accept: "application/json, text/plain, *" },
+    };
+    await axios
+      .request(config)
+      .then((response) => {
+  //      console.log(response.data);
+       risposta=response.data; 
+      
+     })
+      .catch((error) => {
+  //      console.log(error.message);
+        alert(error.message);
+      });
+     
+      return(risposta);
+  }
+  const SessioniFromServer = async (task: string, id:string)=>{
+    let risposta: any;
+    const azienda = localStorage.sede_preparazione;
+     
+    const url =
+    "http://frauweb.frau.it/spedizioni/ajax/index.php?action=ajax&task="+task+"&id_sessione="+id+'&sede_preparazione='+azienda ;
+    const config = {
+      url,
+      method: "get",
+      headers: { Accept: "application/json, text/plain, *" },
+    };
+    await axios
+      .request(config)
+      .then((response) => {
+  //      console.log(response.data);
+       risposta=response.data; 
+       
+     })
+      .catch((error) => {
+  //      console.log(error.message);
+        alert(error.message);
+      });
+    
+      return(risposta);
+  }
+      const sendToServer = async (
       task: string,
     data: etichetta,
     status: number
@@ -109,9 +168,9 @@ const GiriFromServer = async (task: string, id:string)=>{
     await axios
       .post(url, fd, config)
       .then((response) => {
-        console.log("response ajax ", response.data);
+  //      alert("response ajax "+response.data);
         risposta = response.data;
-        getStorage();
+//        getStorage();
       })
       .catch((error) => {
         alert("error " + error.message);
@@ -143,7 +202,7 @@ const GiriFromServer = async (task: string, id:string)=>{
     const arr = raw.split("|");
     const obj: etichetta = {
       num_foglio: arr[0],
-      tot_etichette: arr[1],
+      sessione: arr[1],
       progressivo: arr[2],
       sede: arr[3],
       codice_cliente: arr[4],
@@ -173,6 +232,6 @@ const GiriFromServer = async (task: string, id:string)=>{
     getEtichetta,
     getCollo,
     getStorage,
-    getGiriFromServer,getGiro
+    getGiriFromServer,getSessioniFromServer,getGiro,getStatoSessione,getAvanzamentoSessione
   };
 }

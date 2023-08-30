@@ -132,7 +132,7 @@ export default {
           const currentDate = cDate.slice(0, 10);
           //    this.storage.set("data_login", currentDate);
           localStorage.data_login = currentDate;
-          localStorage.giro_corrente = "";
+          localStorage.sessione_corrente = "";
           localStorage.sede_preparazione = document.getElementById(
             "sede_preparazione"
           ).value;
