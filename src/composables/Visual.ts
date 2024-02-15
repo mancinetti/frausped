@@ -64,6 +64,10 @@ const getGiro = async (id:string)=>{
 const getStatoSessione = async (id:string)=>{
   return(await StatoSessioneFromServer(id));
 }
+const execChiudiSessione = async (id:string)=>{
+  return(await SessioniFromServer('setChiudiSessione',id));
+}
+
 const GiriFromServer = async (task: string, id:string)=>{
     let risposta: any;
     const azienda = localStorage.sede_preparazione;
@@ -120,6 +124,7 @@ const GiriFromServer = async (task: string, id:string)=>{
      
     const url =
     "http://frauweb.frau.it/spedizioni/ajax/index.php?action=ajax&task="+task+"&id_sessione="+id+'&sede_preparazione='+azienda ;
+    console.log(url);
     const config = {
       url,
       method: "get",
@@ -128,7 +133,7 @@ const GiriFromServer = async (task: string, id:string)=>{
     await axios
       .request(config)
       .then((response) => {
-  //      console.log(response.data);
+      console.log(response.data);
        risposta=response.data; 
        
      })
@@ -232,6 +237,6 @@ const GiriFromServer = async (task: string, id:string)=>{
     getEtichetta,
     getCollo,
     getStorage,
-    getGiriFromServer,getSessioniFromServer,getGiro,getStatoSessione,getAvanzamentoSessione
+    getGiriFromServer,getSessioniFromServer,getGiro,getStatoSessione,getAvanzamentoSessione,execChiudiSessione
   };
 }

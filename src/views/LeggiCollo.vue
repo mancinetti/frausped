@@ -37,6 +37,9 @@
       <ion-button v-if="lettura != 1" type="button" @click="GoNoCollo()">
         Dichiara Collo non Presente
       </ion-button>
+      <ion-button v-if="lettura != 1" type="button" @click="GoColloForzato()">
+        Collo comunque corretto
+      </ion-button>
       <ion-button v-if="lettura != 1" type="button" @click="GoEtichetta()"
         >Torna a lettura Etichetta
       </ion-button>
@@ -78,6 +81,9 @@ export default {
     GoNoCollo() {
       this.SetNoCollo();
     },
+    GoColloForzato() {
+      this.SetColloForzato();
+    },
   },
 
   setup() {
@@ -102,6 +108,22 @@ export default {
       //       alert("risposta = " + res);
       if (res == "200") {
         mess.value = "risposta dal server: Etichetta aggiornata:Collo Mancante";
+        cl.value = "green";
+      } else if (res == "99") {
+        mess.value = "risposta dal server: Errore comunicazione";
+        cl.value = "red";
+      }
+      lettura.value = 1;
+    }
+    async function SetColloForzato() {
+      if (self.confirm("Confermi che il collo è corretto ?") == false) return;
+      lettura.value = 0;
+      const dati_etich = localStorage.etichetta;
+      const etich = getEtichetta(dati_etich);
+      const res = await sendToServer("receive", etich, 5);
+      //       alert("risposta = " + res);
+      if (res == "200") {
+        mess.value = "risposta dal server: Etichetta aggiornata:Collo Forzato";
         cl.value = "green";
       } else if (res == "99") {
         mess.value = "risposta dal server: Errore comunicazione";
@@ -143,8 +165,12 @@ export default {
         cl.value = "green";
         const res = await sendToServer("receive", etich, 1);
         //       alert("risposta = " + res);
-        if (res == "200") mess.value = "risposta dal server: Etichetta aggiornata";
-        else if (res == "99") {
+        if (res == "200") {
+          mess.value = "risposta dal server: Etichetta aggiornata";
+          setTimeout(() => {
+            self.location.href = "/folder/etichetta";
+          }, 3000);
+        } else if (res == "99") {
           mess.value = "risposta dal server: Errore comunicazione";
           cl.value = "red";
         } else {
@@ -169,6 +195,7 @@ export default {
     return {
       LeggiCodice,
       SetNoCollo,
+      SetColloForzato,
       mess,
       cl,
       attesa,

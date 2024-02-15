@@ -68,6 +68,7 @@
     <ion-toolbar>
       <ion-item>
         <div class="reader_pronto" v-if="lettura == 0">Pronto per la lettura</div>
+        <div class="reader_pronto" v-if="chiusura == 1">Colli completati</div>
         <div class="reader_ok" v-if="lettura == 1">Etichetta letta</div>
       </ion-item>
       <ion-button v-if="lettura == 0" type="button" @Click="Leggi()"
@@ -94,6 +95,9 @@
       <ion-button v-if="lettura == 1" type="button" @click="Leggi()"
         >Rileggi Et.
       </ion-button>
+      <ion-button v-if="chiusura == 1" type="button" @click="ChiudiSessione()"
+        >Chiudi Sessione
+      </ion-button>
       <!--       <div v-if="cl == 'red'" class="red">{{ mess }}</div>
       <div v-if="cl == 'green'" class="green">{{ mess }}</div>
  -->
@@ -106,7 +110,13 @@ import { ref, onMounted, reactive } from "vue";
 import { leggiBarcode } from "@/composables/leggiBarcode";
 import { Visual } from "@/composables/Visual";
 const { BarQrCode, Test, retDebuData } = leggiBarcode();
-const { sendToServer, getEtichetta, getStorage, getAvanzamentoSessione } = Visual();
+const {
+  sendToServer,
+  getEtichetta,
+  getStorage,
+  getAvanzamentoSessione,
+  execChiudiSessione,
+} = Visual();
 import { IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from "@ionic/vue";
 import { useRouter } from "vue-router";
 
@@ -126,6 +136,18 @@ export default {
       //   this.stopInte();
       this.lettura = 0;
       this.LeggiCodice();
+      /*       this.mess = this.TestStatus();
+      this.cl = this.sendAudio({ flag: true });
+      alert("cl" + this.cl + this.mess);
+ */
+    },
+    ChiudiSessione() {
+      //   this.stopInte();
+      if (self.confirm("Confermi la chiusura della sessione ?") == true) {
+        this.setChiudiSessione();
+        self.location.href = "/folder/sessioni";
+      }
+
       /*       this.mess = this.TestStatus();
       this.cl = this.sendAudio({ flag: true });
       alert("cl" + this.cl + this.mess);
@@ -151,6 +173,7 @@ export default {
     const id_sessione = ref(0);
     const cl = ref("red");
     const web = 0;
+    const chiusura = ref(0);
     const etich = ref({});
     const router = useRouter();
     const progressivo = ref("");
@@ -161,16 +184,21 @@ export default {
     const decod_sede = ref();
     const decod_letta = ref();
     const etichetta_letta = ref(0);
-    console.log(props);
+    //    console.log(props);
     async function getNumeriSessione(id_sess) {
       ///      stato_sessione.value = await getStatoSessione(id_sessione);
       avanzamento_sessione.value = await getAvanzamentoSessione(id_sess);
       avanzamento_sessione.tocoas = avanzamento_sessione.value.tocoas;
       avanzamento_sessione.torili = avanzamento_sessione.value.torili;
       avanzamento_sessione.toboac = avanzamento_sessione.value.toboac;
-      /*       avanzamento_sessione.num_corl = vtmp[3];
-      avanzamento_sessione.num_coba = vtmp[4];
- */
+
+      if (avanzamento_sessione.tocoas == stato_sessione.num_coas) {
+        chiusura.value = 1;
+      }
+    }
+    async function setChiudiSessione() {
+      console.log(id_sessione);
+      await execChiudiSessione(id_sessione.value);
     }
     async function LeggiCodice() {
       //      cl.value = sendAudio({ flag: true });
@@ -250,8 +278,16 @@ export default {
       if (cod.length == 11) {
         sciolte.value = 1;
       } else {
-        if (asso == "99" || asso == "CI") sciolte.value = 2;
-        else sciolte.value = 0;
+        if (asso == "99" || asso == "CI") {
+          sciolte.value = 2;
+        } else {
+          sciolte.value = 0;
+          if (res == "200") {
+            setTimeout(() => {
+              self.location.href = "/folder/collo";
+            }, 3000);
+          }
+        }
       }
       // console.log("*" + codice.value + "*", asso, sciolte.value);
       document.querySelector("body").classList.remove("scanner-active");
@@ -302,6 +338,7 @@ export default {
           stato_sessione.num_coba = vtmp[4];
 
           getNumeriSessione(id_sessione.value);
+          LeggiCodice();
         }
       }
     );
@@ -310,6 +347,7 @@ export default {
       BarQrCode,
       getEtichetta,
       getNumeriSessione,
+      setChiudiSessione,
       Test,
       mess,
       cl,
@@ -317,6 +355,7 @@ export default {
       router,
       getStorage,
       lettura,
+      chiusura,
       sciolte,
       foglio,
       progressivo,
@@ -373,6 +412,7 @@ export default {
   border-radius: 25px;
   background-color: green;
 }
+
 .sciolte {
   text-align: center;
   padding: 10px;
@@ -413,10 +453,12 @@ export default {
   display: block;
   border-color: 1px solid blue;
 }
+
 .title {
   font-size: 0.8em;
   color: blue;
 }
+
 body.scanner-active {
   --background: transparent;
   --ion-background-color: transparent;
